@@ -38,10 +38,6 @@ func SetupRoutes() *mux.Router {
     router.HandleFunc("/borrowing_records", controllers.AddBorrowingRecord).Methods("POST")
     router.HandleFunc("/borrowing_records/{borrowing_id}", controllers.UpdateBorrowingRecord).Methods("PUT")
     router.HandleFunc("/borrowing_records/{borrowing_id}", controllers.DeleteBorrowingRecord).Methods("DELETE")
-
-    // Additional queries (optional)
-    // router.HandleFunc("/students/{student_id}/books", controllers.GetBooksByStudent).Methods("GET")
-    // router.HandleFunc("/authors/{author_id}/books", controllers.GetBooksByAuthor).Methods("GET")
-
+    
     return router
 }

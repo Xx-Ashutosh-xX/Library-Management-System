@@ -4,7 +4,7 @@ import (
     "database/sql"
     "log"
 
-    _ "github.com/go-sql-driver/mysql" // MySQL driver
+    _ "github.com/go-sql-driver/mysql"
 )
 
 var DB *sql.DB
@@ -12,7 +12,7 @@ var DB *sql.DB
 func Connect() {
     var err error
     // Change the connection string according to your MySQL configuration
-    connStr := "root:12345678@tcp(localhost:3306)/library" // Adjust username, password, and database name
+    connStr := "root:12345678@tcp(localhost:3306)/library" 
     DB, err = sql.Open("mysql", connStr)
     if err != nil {
         log.Fatal(err)

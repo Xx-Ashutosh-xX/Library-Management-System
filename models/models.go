@@ -41,7 +41,7 @@ type BorrowingRecord struct {
     BorrowingID    string `json:"borrowing_id"`
     StudentID      string `json:"student_id"`
     BookID         string `json:"book_id"`
-    BorrowingDate  string `json:"borrowing_date"` // Use time.Time if you want to handle dates
-    ReturnDate     string `json:"return_date"`    // Use time.Time if you want to handle dates
+    BorrowingDate  string `json:"borrowing_date"` 
+    ReturnDate     string `json:"return_date"`    
     Fine            float64 `json:"fine"`
 }

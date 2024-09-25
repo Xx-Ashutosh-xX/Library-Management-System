@@ -30,7 +30,7 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
     // Add the search condition if a search query is provided
     var args []interface{}
     if searchQuery != "" {
-        searchQuery = "%" + searchQuery + "%" // Prepare for LIKE clause
+        searchQuery = "%" + searchQuery + "%"
         baseQuery += ` WHERE b.Title LIKE ? OR a.Name LIKE ? OR p.Name LIKE ?`
         args = append(args, searchQuery, searchQuery, searchQuery)
     }
@@ -107,7 +107,7 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Step 1: Add or retrieve the publisher
+    // Add or retrieve the publisher
     var publisherID int64
     err := database.DB.QueryRow("SELECT Publisher_ID FROM Publishers WHERE Name = ?", book.PublisherName).Scan(&publisherID)
     if err != nil {
@@ -120,7 +120,7 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
             }
 
             // Get the newly inserted Publisher_ID
-            publisherID, err = result.LastInsertId() // Use the result here
+            publisherID, err = result.LastInsertId()
             if err != nil {
                 http.Error(w, err.Error(), http.StatusInternalServerError)
                 return
@@ -131,7 +131,7 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
         }
     }
 
-    // Step 2: Add the book to the database
+    // Add the book to the database
     query := "INSERT INTO Books (ISBN, Title, Publication_Date, Genre, Publisher_ID) VALUES (?, ?, ?, ?, ?)"
     _, err = database.DB.Exec(query, book.ISBN, book.Title, book.PublicationDate, book.Genre, publisherID)
     if err != nil {
@@ -139,7 +139,7 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Step 3: Add authors if they are not already present
+    // Add authors if they are not already present
     for _, author := range book.Authors {
         var authorID int64
         err = database.DB.QueryRow("SELECT Author_ID FROM Authors WHERE Name = ?", author.Name).Scan(&authorID)
@@ -175,7 +175,7 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
         }
     }
 
-    // Step 4: Respond with a success status
+    // Respond with a success status
     w.WriteHeader(http.StatusCreated)
 }
 
@@ -193,7 +193,7 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Step 1: Check if the publisher exists; if not, insert it
+    // Check if the publisher exists; if not, insert it
     var publisherID int64
     err := database.DB.QueryRow("SELECT Publisher_ID FROM Publishers WHERE Name = ?", book.PublisherName).Scan(&publisherID)
     if err != nil {
@@ -217,7 +217,7 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
         }
     }
 
-    // Step 2: Update the book with the new details and publisher ID
+    // Update the book with the new details and publisher ID
     query := "UPDATE Books SET Title = ?, Publication_Date = ?, Genre = ?, Publisher_ID = ? WHERE ISBN = ?"
     _, err = database.DB.Exec(query, book.Title, book.PublicationDate, book.Genre, publisherID, isbn)
     if err != nil {
