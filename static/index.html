@@ -1,0 +1,664 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2{
+            text-align: center;
+            color: #007BFF;
+            margin-bottom: 10px;
+        }
+        h3 {
+            color: #007BFF;
+            margin-bottom: 10px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .form-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        input[type="text"],
+        input[type="date"],
+        textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+        background-color: #6c757d; /* Grey color for disabled state */
+        cursor: not-allowed;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f1f1f1;
+        }
+        #deleteResultsBook, #deleteResultsAuthor, #deleteResultsAuthor, #deleteResultsPublisher, #deleteResultsStudent, #deleteResultsRecord {
+            margin-top: 15px;
+            color: red;
+        }
+        .author-section {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px dashed #007BFF;
+            border-radius: 5px;
+            background: #e7f3ff;
+        }
+        .removeAuthorButton {
+            background-color: #dc3545;
+        }
+        .removeAuthorButton:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    
+    <h1>Library Management</h1>
+
+    <!-- Search Section -->
+    <h2>Search a Book</h2>
+    <div>
+        <input type="text" id="searchInput" placeholder="Search for books..." />
+        <button id="searchButton">Search</button>
+        <div id="results"></div>
+    </div>
+
+    <!-- Add Book Section -->
+    <div class="form-section">
+        <h2>Add a New Book</h2>
+        <input type="text" id="isbn" placeholder="ISBN" required />
+        <input type="text" id="title" placeholder="Title" required />
+        <input type="date" id="publicationDate" required />
+        <input type="text" id="genre" placeholder="Genre" required />
+        <input type="text" id="publisherName" placeholder="Publisher Name" required />
+        <input type="text" id="publisherAddress" placeholder="Publisher Address" required />
+        <input type="text" id="publisherContact" placeholder="Publisher Contact" required />
+        
+        <div id="authorsContainer">
+            <div class="author-section">
+                <input type="text" class="authorName" placeholder="Author Name" required />
+                <textarea class="authorBiography" placeholder="Author Biography"></textarea>
+                <button class="removeAuthorButton" onclick="removeAuthor(this)">Remove Author</button>
+            </div>
+        </div>
+        <button id="addAuthorButton">Add Another Author</button>
+        <button id="addBookButton" disabled>Add Book</button>
+    </div>
+
+    <!-- Add Author Section -->
+    <div class="form-section">
+        <h2>Add a New Author</h2>
+        <input type="text" id="newAuthorName" placeholder="Author Name" required />
+        <textarea id="newAuthorBiography" placeholder="Author Biography" required></textarea>
+        <button id="addNewAuthorButton" disabled>Add Author</button>
+    </div>
+
+    <!-- Add Publisher Section -->
+    <div class="form-section">
+        <h2>Add a New Publisher</h2>
+        <input type="text" id="newPublisherName" placeholder="Publisher Name" required />
+        <input type="text" id="newPublisherAddress" placeholder="Publisher Address" required />
+        <input type="text" id="newPublisherContact" placeholder="Publisher Contact" required />
+        <button id="addNewPublisherButton" disabled>Add Publisher</button>
+    </div>
+
+    <!-- Add Student Section -->
+    <div class="form-section">
+        <h2>Add a New Student</h2>
+        <input type="text" id="studentName" placeholder="Student Name" required />
+        <input type="text" id="studentEmail" placeholder="Student Email" required />
+        <input type="text" id="studentAddress" placeholder="Student Address" required />
+        <button id="addNewStudentButton" disabled>Add Student</button>
+    </div>
+
+    <!-- Add Borrowing Record Section -->
+    <div class="form-section">
+        <h2>Add a New Borrowing Record</h2>
+        <input type="text" id="borrowingStudentId" placeholder="Student ID" required />
+        <input type="text" id="borrowingBookId" placeholder="Book ISBN" required />
+        <input type="date" id="borrowingDate" required />
+        <input type="date" id="returnDate" />
+        <input type="number" id="fine" placeholder="Fine Amount" />
+        <button id="addBorrowingRecordButton" disabled>Add Borrowing Record</button>
+    </div>
+
+    <!-- Show Borrowing Records Section -->
+    <div class="form-section">
+        <h2>Show Borrowing Records</h2>
+        <input type="text" id="searchStudentId" placeholder="Enter Student ID" />
+        <button id="showBorrowingRecordsButton">Show Borrowing Records</button>
+        <div id="borrowingResults"></div>
+    </div>
+
+    <div id="deleteSection">
+        <h2>Delete Records</h2>
+    
+        <!-- Delete Book -->
+        <div>
+            <h3>Delete Book</h3>
+            <input type="text" id="deleteBookISBN" placeholder="Enter Book ISBN" />
+            <button id="deleteBookButton" disabled>Delete Book</button>
+            <div id="deleteResultsBook"></div>
+        </div>
+    
+        <!-- Delete Author -->
+        <div>
+            <h3>Delete Author</h3>
+            <input type="text" id="deleteAuthorID" placeholder="Enter Author ID" />
+            <button id="deleteAuthorButton" disabled>Delete Author</button>
+            <div id="deleteResultsAuthor"></div>
+        </div>
+    
+        <!-- Delete Publisher -->
+        <div>
+            <h3>Delete Publisher</h3>
+            <input type="text" id="deletePublisherID" placeholder="Enter Publisher ID" />
+            <button id="deletePublisherButton" disabled>Delete Publisher</button>
+            <div id="deleteResultsPublisher"></div>
+        </div>
+    
+        <!-- Delete Student -->
+        <div>
+            <h3>Delete Student</h3>
+            <input type="text" id="deleteStudentID" placeholder="Enter Student ID" />
+            <button id="deleteStudentButton" disabled>Delete Student</button>
+            <div id="deleteResultsStudent"></div>
+        </div>
+        
+        
+        <!-- Delete Borrowing Record -->
+        <div>
+            <h3>Delete Borrowing Record</h3>
+            <input type="text" id="deleteBorrowingID" placeholder="Enter Borrowing Record ID" />
+            <button id="deleteBorrowingButton" disabled>Delete Borrowing Record</button>
+            <div id="deleteResultsRecord"></div>
+        </div>
+    </div>    
+
+    <script>
+        // Search Books
+        document.getElementById('searchButton').onclick = function() {
+            const query = document.getElementById('searchInput').value;
+            fetch(`/books?search=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = ''; // Clear previous results
+                    data.forEach(book => {
+                        const bookDiv = document.createElement('div');
+                        bookDiv.className = 'result';
+                        bookDiv.innerHTML = `
+                            <strong>${book.title}</strong> (ISBN: ${book.isbn})<br />
+                            Genre: ${book.genre}<br />
+                            Publisher: ${book.publisher_name}<br />
+                            Authors: ${book.authors.map(author => author.name).join(', ')}
+                        `;
+                        resultsDiv.appendChild(bookDiv);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        };
+
+        // Add Authors to Book
+        document.getElementById('addAuthorButton').onclick = function() {
+            const authorsContainer = document.getElementById('authorsContainer');
+            const authorDiv = document.createElement('div');
+            authorDiv.className = 'author-section';
+            authorDiv.innerHTML = `
+                <input type="text" class="authorName" placeholder="Author Name" required />
+                <textarea class="authorBiography" placeholder="Author Biography"></textarea>
+                <button class="removeAuthorButton" onclick="removeAuthor(this)">Remove Author</button>
+            `;
+            authorsContainer.appendChild(authorDiv);
+        };
+
+        function removeAuthor(button) {
+            const authorSection = button.parentElement;
+            authorSection.remove();
+        }
+
+        // Add Book
+        document.getElementById('addBookButton').onclick = function() {
+            const authors = [];
+            document.querySelectorAll('.author-section').forEach(authorSection => {
+                const authorName = authorSection.querySelector('.authorName').value;
+                const authorBiography = authorSection.querySelector('.authorBiography').value;
+                authors.push({
+                    name: authorName,
+                    biography: authorBiography
+                });
+            });
+
+            const bookData = {
+                isbn: document.getElementById('isbn').value,
+                title: document.getElementById('title').value,
+                publication_date: document.getElementById('publicationDate').value,
+                genre: document.getElementById('genre').value,
+                publisher_name: document.getElementById('publisherName').value,
+                publisher_address: document.getElementById('publisherAddress').value,
+                publisher_contact: document.getElementById('publisherContact').value,
+                authors: authors
+            };
+
+            fetch('/books', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(bookData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Book added successfully!');
+                    // Clear input fields
+                    clearBookFields();
+                } else {
+                    alert('Failed to add book. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding book:', error);
+            });
+        };
+
+        function clearBookFields() {
+            document.getElementById('isbn').value = '';
+            document.getElementById('title').value = '';
+            document.getElementById('publicationDate').value = '';
+            document.getElementById('genre').value = '';
+            document.getElementById('publisherName').value = '';
+            document.getElementById('publisherAddress').value = '';
+            document.getElementById('publisherContact').value = '';
+            document.querySelectorAll('.author-section').forEach(section => section.remove());
+        }
+
+        // Add New Author
+        document.getElementById('addNewAuthorButton').onclick = function() {
+            const authorData = {
+                name: document.getElementById('newAuthorName').value,
+                biography: document.getElementById('newAuthorBiography').value
+            };
+
+            fetch('/authors', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(authorData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Author added successfully!');
+                    document.getElementById('newAuthorName').value = '';
+                    document.getElementById('newAuthorBiography').value = '';
+                } else {
+                    alert('Failed to add author. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding author:', error);
+            });
+        };
+
+        // Add New Publisher
+        document.getElementById('addNewPublisherButton').onclick = function() {
+            const publisherData = {
+                name: document.getElementById('newPublisherName').value,
+                address: document.getElementById('newPublisherAddress').value,
+                contact_information: document.getElementById('newPublisherContact').value
+            };
+
+            fetch('/publishers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(publisherData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Publisher added successfully!');
+                    document.getElementById('newPublisherName').value = '';
+                    document.getElementById('newPublisherAddress').value = '';
+                    document.getElementById('newPublisherContact').value = '';
+                } else {
+                    alert('Failed to add publisher. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding publisher:', error);
+            });
+        };
+
+        // Add New Student
+        document.getElementById('addNewStudentButton').onclick = function() {
+            const studentData = {
+                name: document.getElementById('studentName').value,
+                email: document.getElementById('studentEmail').value,
+                address: document.getElementById('studentAddress').value
+            };
+
+            fetch('/students', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(studentData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Student added successfully!');
+                    document.getElementById('studentName').value = '';
+                    document.getElementById('studentEmail').value = '';
+                    document.getElementById('studentAddress').value = '';
+                } else {
+                    alert('Failed to add student. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding student:', error);
+            });
+        };
+
+        // Add Borrowing Record
+        document.getElementById('addBorrowingRecordButton').onclick = function() {
+            const borrowingData = {
+                student_id: document.getElementById('borrowingStudentId').value,
+                book_id: document.getElementById('borrowingBookId').value,
+                borrowing_date: document.getElementById('borrowingDate').value,
+                return_date: document.getElementById('returnDate').value,
+                fine: parseFloat(document.getElementById('fine').value) || 0
+            };
+
+            fetch('/borrowing_records', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(borrowingData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Borrowing record added successfully!');
+                    document.getElementById('borrowingStudentId').value = '';
+                    document.getElementById('borrowingBookId').value = '';
+                    document.getElementById('borrowingDate').value = '';
+                    document.getElementById('returnDate').value = '';
+                    document.getElementById('fine').value = '';
+                } else {
+                    alert('Failed to add borrowing record. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding borrowing record:', error);
+            });
+        };
+
+
+        // Show Borrowing Records
+        document.getElementById('showBorrowingRecordsButton').onclick = function() {
+            const studentId = document.getElementById('searchStudentId').value;
+            let url = '/borrowing_records';
+
+            // Append student_id query parameter if provided
+            if (studentId) {
+                url += `?student_id=${encodeURIComponent(studentId)}`;
+            }
+
+            fetch(url)
+                .then(response => {
+                    // Check if response is OK
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const resultsDiv = document.getElementById('borrowingResults');
+                    resultsDiv.innerHTML = ''; // Clear previous results
+
+                    // Check if data is null or an empty array
+                    if (data === null || (Array.isArray(data) && data.length === 0)) {
+                        resultsDiv.innerHTML = '<p>No borrowing records found.</p>';
+                        return;
+                    }
+
+                    data.forEach(record => {
+                        const recordDiv = document.createElement('div');
+                        recordDiv.className = 'result';
+                        recordDiv.innerHTML = `
+                            <strong>Borrowing ID: ${record.borrowing_id}</strong><br />
+                            Student ID: ${record.student_id}<br />
+                            Book ISBN: ${record.book_id}<br />
+                            Borrowing Date: ${record.borrowing_date}<br />
+                            Return Date: ${record.return_date || 'Not Returned'}<br />
+                            Fine: $${record.fine || 0}
+                        `;
+                        resultsDiv.appendChild(recordDiv);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching borrowing records:', error);
+                    const resultsDiv = document.getElementById('borrowingResults');
+                    resultsDiv.innerHTML = '<p>Error fetching records. Please try again.</p>';
+                });
+        };
+
+        // Function to delete a book
+        document.getElementById('deleteBookButton').onclick = function() {
+            const isbn = document.getElementById('deleteBookISBN').value;
+
+            fetch(`/books/${encodeURIComponent(isbn)}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to delete book');
+                document.getElementById('deleteResultsBook').innerHTML = '<p>Book deleted successfully!</p>';
+            })
+            .catch(error => {
+                console.error('Error deleting book:', error);
+                document.getElementById('deleteResultsBook').innerHTML = '<p>Error deleting book. Please try again.</p>';
+            });
+        };
+
+        // Function to delete an author
+        document.getElementById('deleteAuthorButton').onclick = function() {
+            const authorID = document.getElementById('deleteAuthorID').value;
+
+            fetch(`/authors/${encodeURIComponent(authorID)}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to delete author');
+                document.getElementById('deleteResultsAuthor').innerHTML = '<p>Author deleted successfully!</p>';
+            })
+            .catch(error => {
+                console.error('Error deleting author:', error);
+                document.getElementById('deleteResultsAuthor').innerHTML = '<p>Error deleting author. Please try again.</p>';
+            });
+        };
+
+        // Function to delete a publisher
+        document.getElementById('deletePublisherButton').onclick = function() {
+            const publisherID = document.getElementById('deletePublisherID').value;
+
+            fetch(`/publishers/${encodeURIComponent(publisherID)}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to delete publisher');
+                document.getElementById('deleteResultsPublisher').innerHTML = '<p>Publisher deleted successfully!</p>';
+            })
+            .catch(error => {
+                console.error('Error deleting publisher:', error);
+                document.getElementById('deleteResultsPublisher').innerHTML = '<p>Error deleting publisher. Please try again.</p>';
+            });
+        };
+
+        // Function to delete a student
+        document.getElementById('deleteStudentButton').onclick = function() {
+            const studentID = document.getElementById('deleteStudentID').value;
+
+            fetch(`/students/${encodeURIComponent(studentID)}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to delete student');
+                document.getElementById('deleteResultsStudent').innerHTML = '<p>Student deleted successfully!</p>';
+            })
+            .catch(error => {
+                console.error('Error deleting student:', error);
+                document.getElementById('deleteResultsStudent').innerHTML = '<p>Error deleting student. Please try again.</p>';
+            });
+        };
+
+        // Function to delete a borrowing record
+        document.getElementById('deleteBorrowingButton').onclick = function() {
+            const borrowingID = document.getElementById('deleteBorrowingID').value;
+
+            fetch(`/borrowing_records/${encodeURIComponent(borrowingID)}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to delete borrowing record');
+                document.getElementById('deleteResultsRecord').innerHTML = '<p>Borrowing record deleted successfully!</p>';
+            })
+            .catch(error => {
+                console.error('Error deleting borrowing record:', error);
+                document.getElementById('deleteResultsRecord').innerHTML = '<p>Error deleting borrowing record. Please try again.</p>';
+            });
+        };
+
+        // Function to check form validity and enable/disable the button
+        function checkFormValidity(fields, buttonId) {
+            const isValid = fields.every(field => field.value.trim() !== '');
+            document.getElementById(buttonId).disabled = !isValid;
+        }
+
+        // Add event listeners for the Add Book section
+        const bookFields = [
+            document.getElementById('isbn'),
+            document.getElementById('title'),
+            document.getElementById('publicationDate'),
+            document.getElementById('genre'),
+            document.getElementById('publisherName'),
+            document.getElementById('publisherAddress'),
+            document.getElementById('publisherContact')
+        ];
+
+        bookFields.forEach(field => {
+            field.addEventListener('input', () => checkFormValidity(bookFields, 'addBookButton'));
+        });
+        checkFormValidity(bookFields, 'addBookButton');
+
+        // Add event listeners for the Add Author section
+        const authorFields = [
+            document.getElementById('newAuthorName'),
+            document.getElementById('newAuthorBiography')
+        ];
+
+        authorFields.forEach(field => {
+            field.addEventListener('input', () => checkFormValidity(authorFields, 'addNewAuthorButton'));
+        });
+        checkFormValidity(authorFields, 'addNewAuthorButton');
+
+        // Add event listeners for the Add Publisher section
+        const publisherFields = [
+            document.getElementById('newPublisherName'),
+            document.getElementById('newPublisherAddress'),
+            document.getElementById('newPublisherContact')
+        ];
+
+        publisherFields.forEach(field => {
+            field.addEventListener('input', () => checkFormValidity(publisherFields, 'addNewPublisherButton'));
+        });
+        checkFormValidity(publisherFields, 'addNewPublisherButton');
+
+        // Add event listeners for the Add Student section
+        const studentFields = [
+            document.getElementById('studentName'),
+            document.getElementById('studentEmail'),
+            document.getElementById('studentAddress')
+        ];
+
+        studentFields.forEach(field => {
+            field.addEventListener('input', () => checkFormValidity(studentFields, 'addNewStudentButton'));
+        });
+        checkFormValidity(studentFields, 'addNewStudentButton');
+
+        // Add event listeners for the Add Borrowing Record section
+        const borrowingFields = [
+            document.getElementById('borrowingStudentId'),
+            document.getElementById('borrowingBookId'),
+            document.getElementById('borrowingDate'),
+            document.getElementById('returnDate'),
+            document.getElementById('fine')
+        ];
+
+        borrowingFields.forEach(field => {
+            field.addEventListener('input', () => checkFormValidity(borrowingFields, 'addBorrowingRecordButton'));
+        });
+        checkFormValidity(borrowingFields, 'addBorrowingRecordButton');
+
+        // Function to enable/disable delete buttons
+        function toggleDeleteButton(inputId, buttonId) {
+            const inputField = document.getElementById(inputId);
+            const deleteButton = document.getElementById(buttonId);
+
+            inputField.addEventListener('input', () => {
+                deleteButton.disabled = !inputField.value.trim();
+            });
+        }
+
+        // Call the toggle function for each delete section
+        toggleDeleteButton('deleteBookISBN', 'deleteBookButton');
+        toggleDeleteButton('deleteAuthorID', 'deleteAuthorButton');
+        toggleDeleteButton('deletePublisherID', 'deletePublisherButton');
+        toggleDeleteButton('deleteStudentID', 'deleteStudentButton');
+        toggleDeleteButton('deleteBorrowingID', 'deleteBorrowingButton');
+
+
+
+    </script>
+</body>
+</html>
