@@ -50,8 +50,23 @@ func AddBorrowingRecord(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    // Check if the book is already borrowed
+    var count int
+    checkQuery := "SELECT COUNT(*) FROM Borrowing_Records WHERE Book_ID = ?"
+    err := database.DB.QueryRow(checkQuery, record.BookID).Scan(&count)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    if count > 0 {
+        http.Error(w, "This book is already borrowed and cannot be borrowed again.", http.StatusConflict)
+        return
+    }
+
+    // Insert the new borrowing record
     query := "INSERT INTO Borrowing_Records (Student_ID, Book_ID, Borrowing_Date, Return_Date, Fine) VALUES (?, ?, ?, ?, ?)"
-    _, err := database.DB.Exec(query, record.StudentID, record.BookID, record.BorrowingDate, record.ReturnDate, record.Fine)
+    _, err = database.DB.Exec(query, record.StudentID, record.BookID, record.BorrowingDate, record.ReturnDate, record.Fine)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
@@ -59,6 +74,7 @@ func AddBorrowingRecord(w http.ResponseWriter, r *http.Request) {
 
     w.WriteHeader(http.StatusCreated)
 }
+
 
 // UpdateBorrowingRecord updates borrowing record details
 func UpdateBorrowingRecord(w http.ResponseWriter, r *http.Request) {
